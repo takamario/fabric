@@ -6,11 +6,13 @@ from fabric.context_managers import shell_env, settings
 from fabric.operations import put
 
 
+@with_settings(warn_only=True)
 def update_apt_pkgs():
-    sudo('apt-get update')
-    sudo('apt-get upgrade -y')
-    sudo('apt-get autoclean')
-    sudo('apt-get autoremove -y')
+    if sudo('dpkg -s nginx | grep "install ok installed" > /dev/null').failed:
+        sudo('apt-get update')
+        sudo('apt-get upgrade -y')
+        sudo('apt-get autoclean')
+        sudo('apt-get autoremove -y')
 
 
 def install_apt_pkgs():
@@ -28,6 +30,8 @@ def install_apt_pkgs():
         'libxml2-dev',
         'ncurses-term',
         'openssl',
+        'sysstat',
+        'sysv-rc-conf',
         'tk-dev',
         'zip',
         'zlib1g-dev',
@@ -94,7 +98,7 @@ def install_ruby():
 @with_settings(warn_only=True, sudo_user='takamaru')
 def install_gems():
     with shell_env(HOME='/home/takamaru', PATH="/home/takamaru/.rbenv/bin:$PATH"):
-        if sudo('test -f ~/.gemrc && grep "gem:" ~/.gemrc').failed:
+        if sudo('test -f ~/.gemrc && grep "gem:" ~/.gemrc > /dev/null').failed:
             sudo('echo "gem: --no-ri --no-rdoc -V" >> ~/.gemrc')
         else:
             print '".gemrc" already exists'
@@ -108,7 +112,8 @@ def install_gems():
             'spring',
         ]
 
-        not_installed = installed = []
+        not_installed = []
+        installed = []
         for g in gems:
             if sudo("eval \"$(rbenv init -)\" && gem list | awk '{print $1}' | egrep '^" + g + "$' > /dev/null").failed:
                 not_installed.append(g)
@@ -119,14 +124,18 @@ def install_gems():
         if len(not_installed) > 1:
             sudo('eval "$(rbenv init -)" && gem install ' + ' '.join(not_installed))
 
-
         sudo('rbenv rehash')
 
 
 @with_settings(warn_only=True)
 def create_user():
+    if sudo('grep "takamaru" /etc/sudoers > /dev/null').failed:
+        sudo("sed -i -e '/^root/a takamaru ALL=(ALL:ALL) ALL' /etc/sudoers")
+    else:
+        print '"takamaru" is already in sudoers'
+
     if run('cat /etc/passwd | grep takamaru > /dev/null').succeeded:
-        print 'takamaru already exists'
+        print '"takamaru" already exists'
         return
 
     params = {
