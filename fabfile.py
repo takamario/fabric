@@ -124,9 +124,9 @@ def install_gems():
                 not_installed.append(g)
             else:
                 installed.append(g)
-        if len(installed) > 1:
+        if len(installed) > 0:
             print '"%s" is already installed' % ','.join(installed)
-        if len(not_installed) > 1:
+        if len(not_installed) > 0:
             sudo('eval "$(rbenv init -)" && gem install ' + ' '.join(not_installed))
 
         sudo('rbenv rehash')
@@ -285,9 +285,9 @@ def install_npms():
                 not_installed.append(n)
             else:
                 installed.append(n)
-        if len(installed) > 1:
+        if len(installed) > 0:
             print '"%s" is already installed' % ','.join(installed)
-        if len(not_installed) > 1:
+        if len(not_installed) > 0:
             sudo('. $HOME/.nvm/nvm.sh && npm install -g ' + ' '.join(not_installed))
 
 
@@ -328,6 +328,26 @@ def install_python():
         sudo('pyenv rehash')
 
 
+@with_settings(warn_only=True, sudo_user='takamaru')
+def install_pip():
+    with shell_env(HOME='/home/takamaru', PATH="/home/takamaru/.pyenv/bin:$PATH"):
+        pips = [
+            'flake8',
+        ]
+
+        not_installed = []
+        installed = []
+        for p in pips:
+            if sudo("eval \"$(pyenv init -)\" && pip list | awk '{print $1}' | egrep --color=never '^" + p + "$' > /dev/null").failed:
+                not_installed.append(p)
+            else:
+                installed.append(p)
+        if len(installed) > 0:
+            print '"%s" is already installed' % ','.join(installed)
+        if len(not_installed) > 0:
+            sudo('eval "$(pyenv init -)" && pip install ' + ' '.join(not_installed))
+
+
 def install_middlewares():
     update_apt_pkgs()
     install_apt_pkgs()
@@ -340,6 +360,7 @@ def install_middlewares():
     install_nodejs()
     install_npms()
     install_python()
+    install_pip()
     put_rc_files()
     modify_bashrc()
     install_neobundle()
