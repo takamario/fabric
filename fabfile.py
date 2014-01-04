@@ -33,6 +33,7 @@ def install_apt_pkgs():
         'libxml2-dev',
         'ncurses-term',      # xterm-256color
         'openssl',
+        'postgresql',
         'sysstat',           # sar
         'sysv-rc-conf',
         'tk-dev',
