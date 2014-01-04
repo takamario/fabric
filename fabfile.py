@@ -2,7 +2,7 @@
 
 from fabric.api import run, sudo
 from fabric.decorators import with_settings
-from fabric.context_managers import shell_env, settings
+from fabric.context_managers import shell_env  # , settings
 from fabric.operations import put
 
 
@@ -11,6 +11,7 @@ def update_apt_pkgs():
     if sudo('dpkg -s nginx | grep "install ok installed" > /dev/null').failed:
         sudo('apt-get update')
         sudo('apt-get upgrade -y')
+        sudo('apt-get dist-upgrade -y')
         sudo('apt-get autoclean')
         sudo('apt-get autoremove -y')
 
@@ -28,9 +29,9 @@ def install_apt_pkgs():
         'libsqlite3-dev',
         'libssl-dev',
         'libxml2-dev',
-        'ncurses-term',
+        'ncurses-term',      # xterm-256color
         'openssl',
-        'sysstat',
+        'sysstat',           # sar
         'sysv-rc-conf',
         'tk-dev',
         'zip',
@@ -159,8 +160,10 @@ def put_rc_files():
 
         with shell_env(HOME='/home/takamaru'):
             sudo('cp ~vagrant/.vimrc ~')
+            run('rm -f ~vagrant/.vimrc')
     else:
         print '"%s" already exists' % vimrc
+        run('rm -f ~vagrant/.vimrc')
 
     gitconfig = '.gitconfig'
     if run('test -f /home/takamaru/' + gitconfig).failed:
@@ -168,8 +171,10 @@ def put_rc_files():
 
         with shell_env(HOME='/home/takamaru'):
             sudo('cp ~vagrant/.gitconfig ~')
+            run('rm -f ~vagrant/.gitconfig')
     else:
         print '"%s" already exists' % gitconfig
+        run('rm -f ~vagrant/.gitconfig')
 
 
 @with_settings(warn_only=True, sudo_user='takamaru')
@@ -207,6 +212,23 @@ def modify_bashrc():
         sudo("sed -i -e 's/%s/\[" + r'\\\\' + "u:" + r'\\\\' + "W$(__git_ps1 \"(%s)\")]$ /' ~/.bashrc")
 
 
+@with_settings(warn_only=True, sudo_user='takamaru')
+def put_ssh_pubkey():
+    macbook = 'takamario@Shoeis-MacBook-Air.local'
+
+    put('~/.ssh/id_rsa.pub', '~/authorized_keys')
+
+    if sudo('test -d ~takamaru/.ssh').failed:
+        sudo('mkdir -m 700 ~takamaru/.ssh')
+    else:
+        print '"~takamaru/.ssh" already exists'
+
+    if sudo('grep "' + macbook + '" ~takamaru/.ssh/authorized_keys > /dev/null').failed:
+        sudo('cat ~vagrant/authorized_keys >> ~takamaru/.ssh/authorized_keys')
+    else:
+        print '"ssh_pubkey" is already added'
+
+
 def install_middlewares():
     update_apt_pkgs()
     install_apt_pkgs()
@@ -219,3 +241,4 @@ def install_middlewares():
     put_rc_files()
     modify_bashrc()
     install_neobundle()
+    put_ssh_pubkey()
