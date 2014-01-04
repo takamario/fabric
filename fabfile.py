@@ -16,6 +16,7 @@ def update_apt_pkgs():
         sudo('apt-get autoremove -y')
 
 
+@with_settings(warn_only=True)
 def install_apt_pkgs():
     pkgs = [
         'build-essential',
@@ -24,6 +25,7 @@ def install_apt_pkgs():
         'git',
         'libbz2-dev',
         'libgd-dev',
+        'libmysqlclient-dev',
         'libreadline-dev',
         'libreadline6-dev',
         'libsqlite3-dev',
@@ -229,6 +231,18 @@ def put_ssh_pubkey():
         print '"ssh_pubkey" is already added'
 
 
+@with_settings(warn_only=True, sudo_user='takamaru')
+def create_ssh_keys():
+    if sudo('test -f ~takamaru/.ssh/id_rsa').succeeded:
+        print '"ssh_seckey already exists"'
+    else:
+        if sudo('test -d ~takamaru/.ssh').failed:
+            sudo('mkdir -m 700 ~takamaru/.ssh')
+        else:
+            print '"~takamaru/.ssh" already exists'
+        sudo('ssh-keygen -t rsa -N "" -f ~takamaru/.ssh/id_rsa')
+
+
 def install_middlewares():
     update_apt_pkgs()
     install_apt_pkgs()
@@ -242,3 +256,4 @@ def install_middlewares():
     modify_bashrc()
     install_neobundle()
     put_ssh_pubkey()
+    create_ssh_keys()
