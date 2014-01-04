@@ -253,6 +253,7 @@ def install_nodejs():
         else:
             # Install nvm
             sudo('curl -s https://raw.github.com/creationix/nvm/master/install.sh | sh')
+            sudo("echo 'export NVM_HOME=\"$HOME/.nvm\"' >> ~/.profile")
 
         # Install node
         if sudo('. $HOME/.nvm/nvm.sh && which node').failed:
@@ -262,6 +263,69 @@ def install_nodejs():
             sudo('. $HOME/.nvm/nvm.sh && nvm alias default ' + current_stable)
         else:
             print '"node.js" is already installed'
+
+
+@with_settings(warn_only=True, sudo_user='takamaru')
+def install_npms():
+    with shell_env(HOME='/home/takamaru'):
+        npms = [
+            'coffee-script',
+            'express',
+            'grunt-cli',
+            'jasmine-node',
+            'mocha',
+            'node-dev',
+            'phantomjs',
+        ]
+
+        not_installed = []
+        installed = []
+        for n in npms:
+            if sudo(". $HOME/.nvm/nvm.sh && npm list -g --parseable | egrep 'lib/node_modules/" + n + "$' > /dev/null").failed:
+                not_installed.append(n)
+            else:
+                installed.append(n)
+        if len(installed) > 1:
+            print '"%s" is already installed' % ','.join(installed)
+        if len(not_installed) > 1:
+            sudo('. $HOME/.nvm/nvm.sh && npm install -g ' + ' '.join(not_installed))
+
+
+@with_settings(warn_only=True, sudo_user='takamaru')
+def install_python():
+    with shell_env(HOME='/home/takamaru', PATH="/home/takamaru/.pyenv/bin:$PATH"):
+        # Install pyenv
+        if sudo('test -d ~/.pyenv').failed:
+            sudo('git clone https://github.com/yyuu/pyenv.git ~/.pyenv')
+        else:
+            print '"pyenv" is already installed'
+
+        if sudo('grep ".pyenv" ~/.bashrc > /dev/null').failed:
+            pyenv_root = 'PYENV_ROOT="$HOME\/.pyenv"'
+            path_str = 'PATH="$PYENV_ROOT\/bin:$PATH"'
+            sudo('echo -e "\n# pyenv" >> ~/.bashrc')
+            sudo('echo "export %s" >> ~/.bashrc')
+            sudo("sed -i -e 's/%s/" + pyenv_root + "/g' ~/.bashrc")
+            sudo('echo "export %s" >> ~/.bashrc')
+            sudo("sed -i -e 's/%s/" + path_str + "/g' ~/.bashrc")
+        else:
+            print '"pyenv PATH" is already written'
+
+        if sudo('grep "pyenv init" ~/.bashrc > /dev/null').failed:
+            py_str = '"$(pyenv init -)"'
+            sudo('echo "eval %s" >> ~/.bashrc')
+            sudo("sed -i -e 's/%s/" + py_str + "/g' ~/.bashrc")
+        else:
+            print '"pyenv" init is already written'
+
+        # Install Python
+        python_ver = sudo("pyenv install -l | awk '{print $1}' | egrep --color=never '^2\.7\.[0-9.]+' | tail -1")    # 2.7.x
+        if sudo('pyenv versions | grep --color=never "' + python_ver + '" > /dev/null').failed:
+            sudo('pyenv install ' + python_ver)
+        else:
+            print '"python %s" is already installed' % python_ver
+        sudo('pyenv global ' + python_ver)
+        sudo('pyenv rehash')
 
 
 def install_middlewares():
@@ -274,6 +338,8 @@ def install_middlewares():
     install_ruby()
     install_gems()
     install_nodejs()
+    install_npms()
+    install_python()
     put_rc_files()
     modify_bashrc()
     install_neobundle()
