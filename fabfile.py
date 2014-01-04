@@ -26,6 +26,7 @@ def install_apt_pkgs():
         'libbz2-dev',
         'libgd-dev',
         'libmysqlclient-dev',
+        'libpq-dev',
         'libreadline-dev',
         'libreadline6-dev',
         'libsqlite3-dev',
@@ -235,13 +236,32 @@ def put_ssh_pubkey():
 @with_settings(warn_only=True, sudo_user='takamaru')
 def create_ssh_keys():
     if sudo('test -f ~takamaru/.ssh/id_rsa').succeeded:
-        print '"ssh_seckey already exists"'
+        print '"ssh_seckey" already exists'
     else:
         if sudo('test -d ~takamaru/.ssh').failed:
             sudo('mkdir -m 700 ~takamaru/.ssh')
         else:
             print '"~takamaru/.ssh" already exists'
         sudo('ssh-keygen -t rsa -N "" -f ~takamaru/.ssh/id_rsa')
+
+
+@with_settings(warn_only=True, sudo_user='takamaru')
+def install_nodejs():
+    with shell_env(HOME='/home/takamaru'):
+        if sudo('test -d ~/.nvm').succeeded:
+            print '"nvm" is already installed'
+        else:
+            # Install nvm
+            sudo('curl -s https://raw.github.com/creationix/nvm/master/install.sh | sh')
+
+        # Install node
+        if sudo('. $HOME/.nvm/nvm.sh && which node').failed:
+            current_stable = sudo("curl -s http://nodejs.org | grep -i 'current version' | sed -e 's/\(.*\)current version: \(v[0-9]*\.[0-9]*\.[0-9]*\)\(.*\)/" + '\\' + "2/i'")
+            sudo('. $HOME/.nvm/nvm.sh && nvm install ' + current_stable)
+            sudo('. $HOME/.nvm/nvm.sh && nvm use ' + current_stable)
+            sudo('. $HOME/.nvm/nvm.sh && nvm alias default ' + current_stable)
+        else:
+            print '"node.js" is already installed'
 
 
 def install_middlewares():
@@ -253,6 +273,7 @@ def install_middlewares():
     create_user()
     install_ruby()
     install_gems()
+    install_nodejs()
     put_rc_files()
     modify_bashrc()
     install_neobundle()
