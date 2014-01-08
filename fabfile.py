@@ -5,6 +5,8 @@ from fabric.decorators import with_settings
 from fabric.context_managers import shell_env  # , settings
 from fabric.operations import put
 
+USERNAME='takamaru'
+FULLUSERNAME='Shoei Takamaru'
 
 @with_settings(warn_only=True)
 def update_apt_pkgs():
@@ -62,9 +64,9 @@ def install_mysql():
     sudo('apt-get install -y mysql-server')
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def install_ruby():
-    with shell_env(HOME='/home/takamaru', PATH="/home/takamaru/.rbenv/bin:$PATH"):
+    with shell_env(HOME='/home/' + USERNAME, PATH="/home/" + USERNAME + "/.rbenv/bin:$PATH"):
         # Install rbenv
         if sudo('test -d ~/.rbenv').failed:
             sudo('git clone https://github.com/sstephenson/rbenv.git ~/.rbenv')
@@ -102,9 +104,9 @@ def install_ruby():
         sudo('rbenv rehash')
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def install_gems():
-    with shell_env(HOME='/home/takamaru', PATH="/home/takamaru/.rbenv/bin:$PATH"):
+    with shell_env(HOME='/home/' + USERNAME, PATH="/home/" + USERNAME + "/.rbenv/bin:$PATH"):
         if sudo('test -f ~/.gemrc && grep "gem:" ~/.gemrc > /dev/null').failed:
             sudo('echo "gem: --no-ri --no-rdoc -V" >> ~/.gemrc')
         else:
@@ -136,20 +138,20 @@ def install_gems():
 
 @with_settings(warn_only=True)
 def create_user():
-    if sudo('grep "takamaru" /etc/sudoers > /dev/null').failed:
-        sudo("sed -i -e '/^root/a takamaru ALL=(ALL:ALL) ALL' /etc/sudoers")
+    if sudo('grep "' + USERNAME + '" /etc/sudoers > /dev/null').failed:
+        sudo("sed -i -e '/^root/a " + USERNAME + " ALL=(ALL:ALL) ALL' /etc/sudoers")
     else:
-        print '"takamaru" is already in sudoers'
+        print '"' + USERNAME + '" is already in sudoers'
 
-    if run('cat /etc/passwd | grep takamaru > /dev/null').succeeded:
-        print '"takamaru" already exists'
+    if run('cat /etc/passwd | grep ' + USERNAME + ' > /dev/null').succeeded:
+        print '"' + USERNAME + '" already exists'
         return
 
     params = {
-        '-c': '"Shoei Takamaru"',
-        '-d': '/home/takamaru',
+        '-c': '"' + FULLUSERNAME + '"',
+        '-d': '/home/' + USERNAME,
         '-s': '/bin/bash',
-        '-m': 'takamaru',    # -m and create "takamaru" user
+        '-m': USERNAME,    # -m and create USERNAME user
     }
     param_array = []
     for k, v in params.items():
@@ -158,13 +160,13 @@ def create_user():
     sudo('useradd ' + ' '.join(param_array))
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def put_rc_files():
     vimrc = '.vimrc'
-    if run('test -f /home/takamaru/' + vimrc).failed:
+    if run('test -f /home/' + USERNAME + '/' + vimrc).failed:
         put('~/' + vimrc, '~/' + vimrc)
 
-        with shell_env(HOME='/home/takamaru'):
+        with shell_env(HOME='/home/' + USERNAME):
             sudo('cp ~vagrant/.vimrc ~')
             run('rm -f ~vagrant/.vimrc')
     else:
@@ -172,10 +174,10 @@ def put_rc_files():
         run('rm -f ~vagrant/.vimrc')
 
     gitconfig = '.gitconfig'
-    if run('test -f /home/takamaru/' + gitconfig).failed:
+    if run('test -f /home/' + USERNAME + '/' + gitconfig).failed:
         put('~/' + gitconfig, '~/' + gitconfig)
 
-        with shell_env(HOME='/home/takamaru'):
+        with shell_env(HOME='/home/' + USERNAME):
             sudo('cp ~vagrant/.gitconfig ~')
             run('rm -f ~vagrant/.gitconfig')
     else:
@@ -183,9 +185,9 @@ def put_rc_files():
         run('rm -f ~vagrant/.gitconfig')
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def install_neobundle():
-    with shell_env(HOME='/home/takamaru'):
+    with shell_env(HOME='/home/' + USERNAME):
         if sudo('test -d ~/.vim/bundle').failed:
             sudo('mkdir -p ~/.vim/bundle')
         else:
@@ -198,9 +200,9 @@ def install_neobundle():
             print '"neobundle.vim" is already installed'
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def modify_bashrc():
-    with shell_env(HOME='/home/takamaru'):
+    with shell_env(HOME='/home/' + USERNAME):
 
         if run('grep "GIT_EDITOR=vim" ~/.bashrc > /dev/null').succeeded:
             print '".bashrc" no need to modify'
@@ -218,38 +220,38 @@ def modify_bashrc():
         sudo("sed -i -e 's/%s/\[" + r'\\\\' + "u:" + r'\\\\' + "W$(__git_ps1 \"(%s)\")]$ /' ~/.bashrc")
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def put_ssh_pubkey():
     macbook = 'takamario@Shoeis-MacBook-Air.local'
 
     put('~/.ssh/id_rsa.pub', '~/authorized_keys')
 
-    if sudo('test -d ~takamaru/.ssh').failed:
-        sudo('mkdir -m 700 ~takamaru/.ssh')
+    if sudo('test -d ~' + USERNAME + '/.ssh').failed:
+        sudo('mkdir -m 700 ~' + USERNAME + '/.ssh')
     else:
-        print '"~takamaru/.ssh" already exists'
+        print '"~' + USERNAME + '/.ssh" already exists'
 
-    if sudo('grep "' + macbook + '" ~takamaru/.ssh/authorized_keys > /dev/null').failed:
-        sudo('cat ~vagrant/authorized_keys >> ~takamaru/.ssh/authorized_keys')
+    if sudo('grep "' + macbook + '" ~' + USERNAME + '/.ssh/authorized_keys > /dev/null').failed:
+        sudo('cat ~vagrant/authorized_keys >> ~' + USERNAME + '/.ssh/authorized_keys')
     else:
         print '"ssh_pubkey" is already added'
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def create_ssh_keys():
-    if sudo('test -f ~takamaru/.ssh/id_rsa').succeeded:
+    if sudo('test -f ~' + USERNAME + '/.ssh/id_rsa').succeeded:
         print '"ssh_seckey" already exists'
     else:
-        if sudo('test -d ~takamaru/.ssh').failed:
-            sudo('mkdir -m 700 ~takamaru/.ssh')
+        if sudo('test -d ~' + USERNAME + '/.ssh').failed:
+            sudo('mkdir -m 700 ~' + USERNAME + '/.ssh')
         else:
-            print '"~takamaru/.ssh" already exists'
-        sudo('ssh-keygen -t rsa -N "" -f ~takamaru/.ssh/id_rsa')
+            print '"~' + USERNAME + '/.ssh" already exists'
+        sudo('ssh-keygen -t rsa -N "" -f ~' + USERNAME + '/.ssh/id_rsa')
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def install_nodejs():
-    with shell_env(HOME='/home/takamaru'):
+    with shell_env(HOME='/home/' + USERNAME):
         if sudo('test -d ~/.nvm').succeeded:
             print '"nvm" is already installed'
         else:
@@ -267,9 +269,9 @@ def install_nodejs():
             print '"node.js" is already installed'
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def install_npms():
-    with shell_env(HOME='/home/takamaru'):
+    with shell_env(HOME='/home/' + USERNAME):
         npms = [
             'coffee-script',
             'express',
@@ -293,9 +295,9 @@ def install_npms():
             sudo('. $HOME/.nvm/nvm.sh && npm install -g ' + ' '.join(not_installed))
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def install_python():
-    with shell_env(HOME='/home/takamaru', PATH="/home/takamaru/.pyenv/bin:$PATH"):
+    with shell_env(HOME='/home/' + USERNAME, PATH="/home/" + USERNAME + "/.pyenv/bin:$PATH"):
         # Install pyenv
         if sudo('test -d ~/.pyenv').failed:
             sudo('git clone https://github.com/yyuu/pyenv.git ~/.pyenv')
@@ -330,9 +332,9 @@ def install_python():
         sudo('pyenv rehash')
 
 
-@with_settings(warn_only=True, sudo_user='takamaru')
+@with_settings(warn_only=True, sudo_user=USERNAME)
 def install_pip():
-    with shell_env(HOME='/home/takamaru', PATH="/home/takamaru/.pyenv/bin:$PATH"):
+    with shell_env(HOME='/home/' + USERNAME, PATH="/home/" + USERNAME + "/.pyenv/bin:$PATH"):
         pips = [
             'flake8',
         ]
