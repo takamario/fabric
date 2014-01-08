@@ -39,6 +39,7 @@ def install_apt_pkgs():
         'nkf',
         'openssl',
         'postgresql',
+        'silversearcher-ag',
         'sysstat',           # sar
         'sysv-rc-conf',
         'tk-dev',
