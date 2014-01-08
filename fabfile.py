@@ -32,7 +32,9 @@ def install_apt_pkgs():
         'libsqlite3-dev',
         'libssl-dev',
         'libxml2-dev',
+        'libxslt-dev',
         'ncurses-term',      # xterm-256color
+        'nkf',
         'openssl',
         'postgresql',
         'sysstat',           # sar
@@ -348,6 +350,14 @@ def install_pip():
             sudo('eval "$(pyenv init -)" && pip install ' + ' '.join(not_installed))
 
 
+@with_settings(warn_only=True)
+def install_ja_locale():
+    if sudo('locale -a | grep "ja_JP"').failed:
+        sudo('locale-gen ja_JP.UTF-8')
+    else:
+        print '"ja_JP.UTF-8" is already installed'
+
+
 def install_middlewares():
     update_apt_pkgs()
     install_apt_pkgs()
@@ -366,3 +376,4 @@ def install_middlewares():
     install_neobundle()
     put_ssh_pubkey()
     create_ssh_keys()
+    install_ja_locale()
