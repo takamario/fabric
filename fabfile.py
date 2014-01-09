@@ -279,6 +279,7 @@ def install_npms():
             'express',
             'grunt-cli',
             'jasmine-node',
+            'jshint',
             'mocha',
             'node-dev',
             'phantomjs',
