@@ -37,6 +37,7 @@ def install_apt_pkgs():
         'libxslt-dev',
         'ncurses-term',      # xterm-256color
         'nkf',
+        'ntp',
         'openssl',
         'postgresql',
         'silversearcher-ag',
@@ -360,6 +361,12 @@ def install_ja_locale():
     else:
         print '"ja_JP.UTF-8" is already installed'
 
+@with_settings(warn_only=True)
+def configure_ntp():
+    if sudo('grep "mfeed.ad.jp" /etc/ntp.conf > /dev/null').failed:
+        sudo("sed -i -e '/^server 0/i server ntp1.jst.mfeed.ad.jp" + r'\\' + "nserver ntp2.jst.mfeed.ad.jp" + r'\\' + "nserver ntp3.jst.mfeed.ad.jp' /etc/ntp.conf")
+    else:
+        print '"ntp" is already configured'
 
 def install_middlewares():
     update_apt_pkgs()
@@ -380,3 +387,4 @@ def install_middlewares():
     put_ssh_pubkey()
     create_ssh_keys()
     install_ja_locale()
+    configure_ntp()
