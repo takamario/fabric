@@ -5,8 +5,9 @@ from fabric.decorators import with_settings
 from fabric.context_managers import shell_env  # , settings
 from fabric.operations import put
 
-USERNAME='takamaru'
-FULLUSERNAME='Shoei Takamaru'
+USERNAME = 'takamaru'
+FULLUSERNAME = 'Shoei Takamaru'
+
 
 @with_settings(warn_only=True)
 def update_apt_pkgs():
@@ -362,12 +363,21 @@ def install_ja_locale():
     else:
         print '"ja_JP.UTF-8" is already installed'
 
+
 @with_settings(warn_only=True)
 def configure_ntp():
     if sudo('grep "mfeed.ad.jp" /etc/ntp.conf > /dev/null').failed:
         sudo("sed -i -e '/^server 0/i server ntp1.jst.mfeed.ad.jp" + r'\\' + "nserver ntp2.jst.mfeed.ad.jp" + r'\\' + "nserver ntp3.jst.mfeed.ad.jp' /etc/ntp.conf")
     else:
         print '"ntp" is already configured'
+
+
+@with_settings(warn_only=True)
+def set_utc():
+    tz_str = 'Etc/UTC'
+    sudo("echo '" + tz_str + "' > /etc/timezone")
+    sudo('dpkg-reconfigure -f noninteractive tzdata')
+
 
 def install_middlewares():
     update_apt_pkgs()
@@ -389,3 +399,4 @@ def install_middlewares():
     create_ssh_keys()
     install_ja_locale()
     configure_ntp()
+    set_utc()
