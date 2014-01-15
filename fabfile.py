@@ -276,6 +276,7 @@ def install_nodejs():
 def install_npms():
     with shell_env(HOME='/home/' + USERNAME):
         npms = [
+            'bower',
             'coffee-script',
             'express',
             'grunt-cli',
@@ -375,8 +376,11 @@ def configure_ntp():
 @with_settings(warn_only=True)
 def set_utc():
     tz_str = 'Etc/UTC'
-    sudo("echo '" + tz_str + "' > /etc/timezone")
-    sudo('dpkg-reconfigure -f noninteractive tzdata')
+    if sudo('grep "' + tz_str + '" /etc/timezone > /dev/null').failed:
+        sudo("echo '" + tz_str + "' > /etc/timezone")
+        sudo('dpkg-reconfigure -f noninteractive tzdata')
+    else:
+        print '"UTC" is already used'
 
 
 def install_middlewares():
