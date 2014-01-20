@@ -26,6 +26,7 @@ def install_apt_pkgs():
         'colordiff',
         'curl',
         'git',
+        'imagemagick',
         'libbz2-dev',
         'libgd-dev',
         'libmysqlclient-dev',
@@ -187,6 +188,17 @@ def put_rc_files():
         print '"%s" already exists' % gitconfig
         run('rm -f ~vagrant/.gitconfig')
 
+    inputrc = '.inputrc'
+    if run('test -f /home/' + USERNAME + '/' + inputrc).failed:
+        put('~/' + inputrc, '~/' + inputrc)
+
+        with shell_env(HOME='/home/' + USERNAME):
+            sudo('cp ~vagrant/.inputrc ~')
+            run('rm -f ~vagrant/.inputrc')
+    else:
+        print '"%s" already exists' % inputrc
+        run('rm -f ~vagrant/.inputrc')
+
 
 @with_settings(warn_only=True, sudo_user=USERNAME)
 def install_neobundle():
@@ -277,6 +289,7 @@ def install_npms():
     with shell_env(HOME='/home/' + USERNAME):
         npms = [
             'bower',
+            'coffeelint',
             'coffee-script',
             'express',
             'grunt-cli',
