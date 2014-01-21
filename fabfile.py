@@ -4,6 +4,7 @@ from fabric.api import run, sudo
 from fabric.decorators import with_settings
 from fabric.context_managers import shell_env  # , settings
 from fabric.operations import put
+from fabric.colors import red, green, yellow
 
 USERNAME = 'takamaru'
 FULLUSERNAME = 'Shoei Takamaru'
@@ -75,36 +76,38 @@ def install_ruby():
         # Install rbenv
         if sudo('test -d ~/.rbenv').failed:
             sudo('git clone https://github.com/sstephenson/rbenv.git ~/.rbenv')
+            print green('"rbenv" installed')
         else:
-            print '"rbenv" is already installed'
+            print green('"rbenv" is already installed')
 
         if sudo('grep ".rbenv" ~/.bashrc > /dev/null').failed:
             path_str = 'PATH="$HOME\/.rbenv\/bin:$PATH"'
             sudo('echo -e "\n# rbenv" >> ~/.bashrc')
             sudo('echo "export %s" >> ~/.bashrc')
             sudo("sed -i -e 's/%s/" + path_str + "/g' ~/.bashrc")
+            print green('"rbenv PATH" configured')
         else:
-            print '"rbenv PATH" is already written'
+            print green('"rbenv PATH" is already written')
 
         if sudo('grep "rbenv init" ~/.bashrc > /dev/null').failed:
             rb_str = '"$(rbenv init -)"'
             sudo('echo "eval %s" >> ~/.bashrc')
             sudo("sed -i -e 's/%s/" + rb_str + "/g' ~/.bashrc")
         else:
-            print '"rbenv" init is already written'
+            print green('"rbenv" init is already written')
 
         # Install ruby-build
         if sudo('test -d ~/.rbenv/plugins/ruby-build').failed:
             sudo('git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build')
         else:
-            print '"ruby-build" is already installed'
+            print green('"ruby-build" is already installed')
 
         # Install Ruby
         ruby_ver = sudo("rbenv install -l | awk '{print $1}' | egrep -v 'preview|dev|rc' | egrep --color=never '^2.1.[0-9](.*)$'")    # 2.1.x
         if sudo('rbenv versions | grep --color=never "' + ruby_ver + '" > /dev/null').failed:
             sudo('rbenv install ' + ruby_ver)
         else:
-            print '"ruby %s" is already installed' % ruby_ver
+            print green('"ruby %s" is already installed' % ruby_ver)
         sudo('rbenv global ' + ruby_ver)
         sudo('rbenv rehash')
 
@@ -115,7 +118,7 @@ def install_gems():
         if sudo('test -f ~/.gemrc && grep "gem:" ~/.gemrc > /dev/null').failed:
             sudo('echo "gem: --no-ri --no-rdoc -V" >> ~/.gemrc')
         else:
-            print '".gemrc" already exists'
+            print green('".gemrc" already exists')
 
         gems = [
             'bundler',
@@ -134,8 +137,9 @@ def install_gems():
             else:
                 installed.append(g)
         if len(installed) > 0:
-            print '"%s" is already installed' % ','.join(installed)
+            print green('"%s" is already installed') % ', '.join(installed)
         if len(not_installed) > 0:
+            print yellow('"%s" is not installed') % ', '.join(not_installed)
             sudo('eval "$(rbenv init -)" && gem install ' + ' '.join(not_installed))
 
         sudo('rbenv rehash')
@@ -146,10 +150,10 @@ def create_user():
     if sudo('grep "' + USERNAME + '" /etc/sudoers > /dev/null').failed:
         sudo("sed -i -e '/^root/a " + USERNAME + " ALL=(ALL:ALL) ALL' /etc/sudoers")
     else:
-        print '"' + USERNAME + '" is already in sudoers'
+        print green('"' + USERNAME + '" is already in sudoers')
 
     if run('cat /etc/passwd | grep ' + USERNAME + ' > /dev/null').succeeded:
-        print '"' + USERNAME + '" already exists'
+        print green('"' + USERNAME + '" already exists')
         return
 
     params = {
@@ -175,7 +179,7 @@ def put_rc_files():
             sudo('cp ~vagrant/.vimrc ~')
             run('rm -f ~vagrant/.vimrc')
     else:
-        print '"%s" already exists' % vimrc
+        print green('"%s" already exists' % vimrc)
         run('rm -f ~vagrant/.vimrc')
 
     gitconfig = '.gitconfig'
@@ -186,7 +190,7 @@ def put_rc_files():
             sudo('cp ~vagrant/.gitconfig ~')
             run('rm -f ~vagrant/.gitconfig')
     else:
-        print '"%s" already exists' % gitconfig
+        print green('"%s" already exists' % gitconfig)
         run('rm -f ~vagrant/.gitconfig')
 
     inputrc = '.inputrc'
@@ -197,7 +201,7 @@ def put_rc_files():
             sudo('cp ~vagrant/.inputrc ~')
             run('rm -f ~vagrant/.inputrc')
     else:
-        print '"%s" already exists' % inputrc
+        print green('"%s" already exists' % inputrc)
         run('rm -f ~vagrant/.inputrc')
 
 
@@ -207,13 +211,13 @@ def install_neobundle():
         if sudo('test -d ~/.vim/bundle').failed:
             sudo('mkdir -p ~/.vim/bundle')
         else:
-            print '"~/.vim/bundle" already exists'
+            print green('"~/.vim/bundle" already exists')
 
         if sudo('test -d ~/.vim/bundle/neobundle.vim').failed:
             sudo('git clone git://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim')
             sudo('~/.vim/bundle/neobundle.vim/bin/neoinstall')
         else:
-            print '"neobundle.vim" is already installed'
+            print green('"neobundle.vim" is already installed')
 
 
 @with_settings(warn_only=True, sudo_user=USERNAME)
@@ -221,7 +225,7 @@ def modify_bashrc():
     with shell_env(HOME='/home/' + USERNAME):
 
         if run('grep "GIT_EDITOR=vim" ~/.bashrc > /dev/null').succeeded:
-            print '".bashrc" no need to modify'
+            print green('".bashrc" no need to modify')
             return
 
         sudo('echo -e "\n# aliases" >> ~/.bashrc')
@@ -245,23 +249,23 @@ def put_ssh_pubkey():
     if sudo('test -d ~' + USERNAME + '/.ssh').failed:
         sudo('mkdir -m 700 ~' + USERNAME + '/.ssh')
     else:
-        print '"~' + USERNAME + '/.ssh" already exists'
+        print green('"~' + USERNAME + '/.ssh" already exists')
 
     if sudo('grep "' + macbook + '" ~' + USERNAME + '/.ssh/authorized_keys > /dev/null').failed:
         sudo('cat ~vagrant/authorized_keys >> ~' + USERNAME + '/.ssh/authorized_keys')
     else:
-        print '"ssh_pubkey" is already added'
+        print green('"ssh_pubkey" is already added')
 
 
 @with_settings(warn_only=True, sudo_user=USERNAME)
 def create_ssh_keys():
     if sudo('test -f ~' + USERNAME + '/.ssh/id_rsa').succeeded:
-        print '"ssh_seckey" already exists'
+        print green('"ssh_seckey" already exists')
     else:
         if sudo('test -d ~' + USERNAME + '/.ssh').failed:
             sudo('mkdir -m 700 ~' + USERNAME + '/.ssh')
         else:
-            print '"~' + USERNAME + '/.ssh" already exists'
+            print green('"~' + USERNAME + '/.ssh" already exists')
         sudo('ssh-keygen -t rsa -N "" -f ~' + USERNAME + '/.ssh/id_rsa')
 
 
@@ -269,7 +273,7 @@ def create_ssh_keys():
 def install_nodejs():
     with shell_env(HOME='/home/' + USERNAME):
         if sudo('test -d ~/.nvm').succeeded:
-            print '"nvm" is already installed'
+            print green('"nvm" is already installed')
         else:
             # Install nvm
             sudo('curl -s https://raw.github.com/creationix/nvm/master/install.sh | sh')
@@ -282,7 +286,7 @@ def install_nodejs():
             sudo('. $HOME/.nvm/nvm.sh && nvm use ' + current_stable)
             sudo('. $HOME/.nvm/nvm.sh && nvm alias default ' + current_stable)
         else:
-            print '"node.js" is already installed'
+            print green('"node.js" is already installed')
 
 
 @with_settings(warn_only=True, sudo_user=USERNAME)
@@ -296,6 +300,7 @@ def install_npms():
             'grunt-cli',
             'jasmine-node',
             'jshint',
+            'karma',
             'mocha',
             'node-dev',
             'phantomjs',
@@ -309,8 +314,9 @@ def install_npms():
             else:
                 installed.append(n)
         if len(installed) > 0:
-            print '"%s" is already installed' % ','.join(installed)
+            print green('"%s" is already installed') % ', '.join(installed)
         if len(not_installed) > 0:
+            print yellow('"%s" is not installed') % ', '.join(not_installed)
             sudo('. $HOME/.nvm/nvm.sh && npm install -g ' + ' '.join(not_installed))
 
 
@@ -321,7 +327,7 @@ def install_python():
         if sudo('test -d ~/.pyenv').failed:
             sudo('git clone https://github.com/yyuu/pyenv.git ~/.pyenv')
         else:
-            print '"pyenv" is already installed'
+            print green('"pyenv" is already installed')
 
         if sudo('grep ".pyenv" ~/.bashrc > /dev/null').failed:
             pyenv_root = 'PYENV_ROOT="$HOME\/.pyenv"'
@@ -332,21 +338,21 @@ def install_python():
             sudo('echo "export %s" >> ~/.bashrc')
             sudo("sed -i -e 's/%s/" + path_str + "/g' ~/.bashrc")
         else:
-            print '"pyenv PATH" is already written'
+            print green('"pyenv PATH" is already written')
 
         if sudo('grep "pyenv init" ~/.bashrc > /dev/null').failed:
             py_str = '"$(pyenv init -)"'
             sudo('echo "eval %s" >> ~/.bashrc')
             sudo("sed -i -e 's/%s/" + py_str + "/g' ~/.bashrc")
         else:
-            print '"pyenv" init is already written'
+            print green('"pyenv" init is already written')
 
         # Install Python
         python_ver = sudo("pyenv install -l | awk '{print $1}' | egrep --color=never '^2\.7\.[0-9.]+' | tail -1")    # 2.7.x
         if sudo('pyenv versions | grep --color=never "' + python_ver + '" > /dev/null').failed:
             sudo('pyenv install ' + python_ver)
         else:
-            print '"python %s" is already installed' % python_ver
+            print green('"python %s" is already installed' % python_ver)
         sudo('pyenv global ' + python_ver)
         sudo('pyenv rehash')
 
@@ -366,8 +372,9 @@ def install_pip():
             else:
                 installed.append(p)
         if len(installed) > 0:
-            print '"%s" is already installed' % ','.join(installed)
+            print green('"%s" is already installed') % ', '.join(installed)
         if len(not_installed) > 0:
+            print yellow('"%s" is not installed') % ', '.join(not_installed)
             sudo('eval "$(pyenv init -)" && pip install ' + ' '.join(not_installed))
 
 
@@ -376,16 +383,16 @@ def install_ja_locale():
     if sudo('locale -a | grep "ja_JP"').failed:
         sudo('locale-gen ja_JP.UTF-8')
     else:
-        print '"ja_JP.UTF-8" is already installed'
+        print green('"ja_JP.UTF-8" is already installed')
 
 
 @with_settings(warn_only=True)
 def configure_ntp():
     if sudo('grep "mfeed.ad.jp" /etc/ntp.conf > /dev/null').failed:
         sudo("sed -i -e 's/^\(server *\)/#" + r'\\' +"1/' /etc/ntp.conf")
-        sudo("sed -i -e '/^#server ntp.ubuntu.com/a server ntp.jst.mfeed.ad.jp" + r'\\' + "nserver ntp.ring.gr.jp" + r'\\' + "nserver ntp.nict.jp' /etc/ntp.conf")
+        sudo("sed -i -e '/^#server ntp.ubuntu.com/a server ntp.jst.mfeed.ad.jp" + r'\\' + "nserver ntp.ring.gr.jp' /etc/ntp.conf")
     else:
-        print '"ntp" is already configured'
+        print green('"ntp" is already configured')
 
 
 @with_settings(warn_only=True)
@@ -395,7 +402,7 @@ def set_utc():
         sudo("echo '" + tz_str + "' > /etc/timezone")
         sudo('dpkg-reconfigure -f noninteractive tzdata')
     else:
-        print '"UTC" is already used'
+        print green('"UTC" is already used')
 
 
 def install_middlewares():
