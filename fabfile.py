@@ -46,6 +46,7 @@ def install_apt_pkgs():
         'sysstat',           # sar
         'sysv-rc-conf',
         'tk-dev',
+        'traceroute',
         'zip',
         'zlib1g-dev',
     ]
@@ -381,7 +382,8 @@ def install_ja_locale():
 @with_settings(warn_only=True)
 def configure_ntp():
     if sudo('grep "mfeed.ad.jp" /etc/ntp.conf > /dev/null').failed:
-        sudo("sed -i -e '/^server 0/i server ntp1.jst.mfeed.ad.jp" + r'\\' + "nserver ntp2.jst.mfeed.ad.jp" + r'\\' + "nserver ntp3.jst.mfeed.ad.jp' /etc/ntp.conf")
+        sudo("sed -i -e 's/^\(server *\)/#" + r'\\' +"1/' /etc/ntp.conf")
+        sudo("sed -i -e '/^#server ntp.ubuntu.com/a server ntp.jst.mfeed.ad.jp" + r'\\' + "nserver ntp.ring.gr.jp" + r'\\' + "nserver ntp.nict.jp' /etc/ntp.conf")
     else:
         print '"ntp" is already configured'
 
