@@ -405,6 +405,15 @@ def set_utc():
         print green('"UTC" is already used')
 
 
+@with_settings(warn_only=True)
+def install_heroku_toolbelt():
+    if run('which heroku > /dev/null').failed:
+        print yellow('"heroku toolbelt" is not installed')
+        run('wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh')
+    else:
+        print green('"heroku toolbelt" is already installed')
+
+
 def install_middlewares():
     update_apt_pkgs()
     install_apt_pkgs()
@@ -426,3 +435,4 @@ def install_middlewares():
     install_ja_locale()
     configure_ntp()
     set_utc()
+    install_heroku_toolbelt()
