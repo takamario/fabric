@@ -303,6 +303,7 @@ def install_npms():
             'jshint',
             'karma',
             'karma-coverage',
+            'karma-mocha',
             'mocha',
             'node-dev',
             'phantomjs',
