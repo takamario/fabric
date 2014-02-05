@@ -419,6 +419,22 @@ def install_heroku_toolbelt():
         print green('"heroku toolbelt" is already installed')
 
 
+@with_settings(warn_only=True)
+def install_go():
+    if run('which go > /dev/null').failed:
+        if run('test -d /usr/local/go').failed:
+            version = 'go1.2.linux-amd64.tar.gz'
+            print yellow('"Go" is not installed')
+            run('wget -O /tmp/' + version + ' https://go.googlecode.com/files/' + version)
+            sudo('tar -C /usr/local -xf /tmp/' + version)
+            run('rm /tmp/' + version)
+        if run('grep "/usr/local/go/bin" /home/' + USERNAME + '/.bashrc > /dev/null').failed:
+            sudo("echo 'export PATH=\"/usr/local/go/bin:$PATH\"' >> /home/" + USERNAME + '/.bashrc')
+        print green('"Go" is successfully installed')
+    else:
+        print green('"Go" is already installed')
+
+
 def install_middlewares():
     update_apt_pkgs()
     install_apt_pkgs()
@@ -441,3 +457,4 @@ def install_middlewares():
     configure_ntp()
     set_utc()
     install_heroku_toolbelt()
+    install_go()
