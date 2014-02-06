@@ -294,8 +294,8 @@ def install_npms():
     with shell_env(HOME='/home/' + USERNAME):
         npms = [
             'bower',
-            'coffeelint',
             'coffee-script',
+            'coffeelint',
             'express',
             'grunt-cli',
             'jasmine-node',
@@ -303,12 +303,15 @@ def install_npms():
             'js2coffee',
             'jshint',
             'karma',
-            'karma-expect',
             'karma-coverage',
+            'karma-expect',
             'karma-mocha',
             'mocha',
+            'ngmin',
             'node-dev',
             'phantomjs',
+            'uglify-js',
+            'yo',
         ]
 
         not_installed = []
