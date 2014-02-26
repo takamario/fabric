@@ -38,16 +38,19 @@ def install_apt_pkgs():
         'libssl-dev',
         'libxml2-dev',
         'libxslt-dev',
+        'mailutils',
         'ncurses-term',      # xterm-256color
         'nkf',
         'ntp',
         'openssl',
+        'postfix',
         'postgresql',
         'silversearcher-ag',
         'sysstat',           # sar
         'sysv-rc-conf',
         'tk-dev',
         'traceroute',
+        'vsftpd',
         'zip',
         'zlib1g-dev',
     ]
@@ -103,7 +106,7 @@ def install_ruby():
             print green('"ruby-build" is already installed')
 
         # Install Ruby
-        ruby_ver = sudo("rbenv install -l | awk '{print $1}' | egrep -v 'preview|dev|rc' | egrep --color=never '^2.1.[0-9](.*)$'")    # 2.1.x
+        ruby_ver = sudo("rbenv install -l | awk '{print $1}' | egrep -v 'preview|dev|rc' | egrep --color=never '^2.1.[0-9](.*)$' | tail -1")    # 2.1.x
         if sudo('rbenv versions | grep --color=never "' + ruby_ver + '" > /dev/null').failed:
             sudo('rbenv install ' + ruby_ver)
         else:
@@ -306,6 +309,7 @@ def install_npms():
             'karma-coverage',
             'karma-expect',
             'karma-mocha',
+            'karma-chai',
             'mocha',
             'ngmin',
             'node-dev',
