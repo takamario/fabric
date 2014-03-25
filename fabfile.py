@@ -34,6 +34,7 @@ def install_apt_pkgs():
         'libpq-dev',
         'libreadline-dev',
         'libreadline6-dev',
+        'libsox-fmt-mp3',
         'libsqlite3-dev',
         'libssl-dev',
         'libxml2-dev',
