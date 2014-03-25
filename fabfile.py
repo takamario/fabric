@@ -46,6 +46,7 @@ def install_apt_pkgs():
         'postfix',
         'postgresql',
         'silversearcher-ag',
+        'sox',
         'sysstat',           # sar
         'sysv-rc-conf',
         'tk-dev',
