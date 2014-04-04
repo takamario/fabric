@@ -404,7 +404,7 @@ def install_ja_locale():
 def configure_ntp():
     if sudo('grep "mfeed.ad.jp" /etc/ntp.conf > /dev/null').failed:
         sudo("sed -i -e 's/^\(server *\)/#" + r'\\' +"1/' /etc/ntp.conf")
-        sudo("sed -i -e '/^#server ntp.ubuntu.com/a server ntp.jst.mfeed.ad.jp" + r'\\' + "nserver ntp.ring.gr.jp' /etc/ntp.conf")
+        sudo("sed -i -e '/^#server ntp.ubuntu.com/a server ntp.jst.mfeed.ad.jp iburst" + r'\\' + "nserver ntp.ring.gr.jp iburst' /etc/ntp.conf")
     else:
         print green('"ntp" is already configured')
 
