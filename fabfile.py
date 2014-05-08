@@ -74,6 +74,13 @@ def install_mysql():
 
     sudo('apt-get install -y mysql-server')
 
+@with_settings(warn_only=True)
+def install_mosh():
+    if sudo('dpkg -s mosh | grep "install ok installed" > /dev/null').failed:
+        sudo('apt-get install -y python-software-properties')
+        sudo('add-apt-repository -y ppa:keithw/mosh')
+        sudo('apt-get update')
+        sudo('apt-get install -y mosh')
 
 @with_settings(warn_only=True, sudo_user=USERNAME)
 def install_ruby():
@@ -450,6 +457,7 @@ def install_middlewares():
     install_nginx()
     install_redis()
     install_mysql()
+    install_mosh()
     create_user()
     install_ruby()
     install_gems()
