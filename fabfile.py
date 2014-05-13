@@ -48,6 +48,7 @@ def install_apt_pkgs():
         'postgresql',
         'silversearcher-ag',
         'sox',
+        'sqlite3',
         'sysstat',           # sar
         'sysv-rc-conf',
         'tk-dev',
