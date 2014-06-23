@@ -83,6 +83,13 @@ def install_mosh():
         sudo('apt-get update')
         sudo('apt-get install -y mosh')
 
+@with_settings(warn_only=True)
+def install_ffmpeg():
+    if sudo('dpkg -s ffmpeg | grep "install ok installed" > /dev/null').failed:
+        sudo('add-apt-repository -y ppa:jon-severinsson/ffmpeg')
+        sudo('apt-get update')
+        sudo('apt-get install -y ffmpeg')
+
 @with_settings(warn_only=True, sudo_user=USERNAME)
 def install_ruby():
     with shell_env(HOME='/home/' + USERNAME, PATH="/home/" + USERNAME + "/.rbenv/bin:$PATH"):
@@ -309,7 +316,7 @@ def install_npms():
             'bower',
             'coffee-script',
             'coffeelint',
-            'express',
+            'express-generator',
             'grunt-cli',
             'jasmine-node',
             'js-fixtures',
@@ -457,8 +464,9 @@ def install_middlewares():
     install_apt_pkgs()
     install_nginx()
     install_redis()
-    install_mysql()
+    #install_mysql()
     install_mosh()
+    install_ffmpeg()
     create_user()
     install_ruby()
     install_gems()
