@@ -54,6 +54,7 @@ def install_apt_pkgs():
         'tk-dev',
         'traceroute',
         'vsftpd',
+        'yasm',
         'zip',
         'zlib1g-dev',
     ]
@@ -86,7 +87,7 @@ def install_mosh():
 @with_settings(warn_only=True)
 def install_ffmpeg():
     if sudo('dpkg -s ffmpeg | grep "install ok installed" > /dev/null').failed:
-        sudo('add-apt-repository -y ppa:jon-severinsson/ffmpeg')
+        sudo('add-apt-repository -y ppa:mc3man/trusty-media')
         sudo('apt-get update')
         sudo('apt-get install -y ffmpeg')
 
