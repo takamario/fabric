@@ -23,6 +23,7 @@ def update_apt_pkgs():
 @with_settings(warn_only=True)
 def install_apt_pkgs():
     pkgs = [
+        'apg',
         'build-essential',
         'colordiff',
         'curl',
