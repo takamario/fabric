@@ -26,6 +26,7 @@ def install_apt_pkgs():
         'apg',
         'build-essential',
         'colordiff',
+        'ctags',
         'curl',
         'git',
         'imagemagick',
